@@ -10,20 +10,20 @@
 
 class Function {
 public:
+    virtual double get(Vec &x);
+    virtual double operator()(Vec &x) = 0;
 
-    virtual double get(const Vec &x) = 0;
-    virtual double operator()(const Vec &x) = 0;
-
-
-    virtual Matrix getHessan(const Vec &x);
-    virtual Vec getGradient(const Vec &x);
+    virtual Matrix getHessan(Vec &x);
+    virtual Vec getGradient(Vec &x);
 };
+
 
 class Derivative : public Function {
     Function *f;
-    unsigned dir;
+    unsigned p;
 public:
     Derivative(Function *f, unsigned dir);
+    virtual double operator()(Vec &x);
 };
 
 #endif //METODY_FUNCTION_H

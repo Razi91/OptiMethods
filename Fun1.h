@@ -8,10 +8,8 @@
 
 class Fun1 : public Function {
 public:
-    virtual double operator()(const double x, const double y);
+    virtual double operator()(Vec &x);
 
-    virtual Matrix* getHessan(const double x, const double y);
-    virtual Vec* getGradient(const double x, const double y);
 };
 
 

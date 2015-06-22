@@ -16,6 +16,8 @@ class Matrix {
 public:
     Matrix(int w, int h);
     Matrix(int w);
+    Matrix(const Matrix &m);
+    Matrix& operator=(Matrix &m);
     static Matrix identity(int s);
     ~Matrix();
 
@@ -24,7 +26,7 @@ public:
     void set(const int x, const int y, double val);
 
     Vec* mul(Vec *v);
-    Matrix* reverse(bool isDiagonal=lfalse);
+    Matrix reverse(bool isDiagonal=false);
 
     double det();
 
@@ -33,6 +35,7 @@ public:
     Matrix transpose();
 
     Matrix operator*(Matrix &m);
+    Vec operator*(Vec &v);
     Matrix operator*(const double v);
 
     friend class Vec;

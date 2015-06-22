@@ -7,20 +7,32 @@
 
 
 class Vec {
-    double *data;
+    double *data __attribute__ ((aligned(16)));
     int size;
 
 public:
     Vec(int size);
+
+    Vec(const Vec &v);
+
     ~Vec();
 
-    const int getSize();
-    const double get(int i);
-    const double operator()(int i);
-    Vec operator+(const Vec &b);
-    Vec operator-(const Vec &b);
-    Vec operator*(const Vec &b);
-    Vec operator/(const Vec &b);
+    int getSize();
+
+    double get(const int i);
+
+    double operator[](const int i);
+
+    Vec operator+(Vec &b);
+    Vec operator-(Vec &b);
+    Vec operator*(Vec &b);
+    Vec operator/(Vec &b);
+
+    Vec operator+=(Vec &b);
+    Vec operator-=(Vec &b);
+    Vec operator*=(Vec &b);
+    Vec operator/=(Vec &b);
+
     Vec operator*(const double b);
     Vec operator/(const double b);
 

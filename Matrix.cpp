@@ -27,6 +27,22 @@ Matrix::~Matrix() {
     delete this->data;
 }
 
+Matrix::Matrix(const Matrix &m) {
+    this->w = m.w;
+    this->h = m.h;
+    this->data = new double[w*h];
+    memcpy(data, m.data, w*h*sizeof(double));
+}
+
+Matrix& Matrix::operator=(Matrix &m) {
+    this->~Matrix();
+    this->w = m.w;
+    this->h = m.h;
+    this->data = new double[w*h];
+    memcpy(data, m.data, w*h*sizeof(double));
+    return *this;
+}
+
 double Matrix::get(const int x, const int y) {
     return data[x + y * w];
 }
@@ -95,25 +111,25 @@ double Matrix::det() {
     return d;
 }
 
-Matrix *Matrix::reverse(bool isDiagonal) {
+Matrix Matrix::reverse(bool isDiagonal) {
     assert(w==h);
-    Matrix *m = new Matrix(w, h);
+    Matrix m(w, h);
     if(isDiagonal){
-        std::fill(m->data, m->data+w*h, 0.0);
+        std::fill(m.data, m.data+w*h, 0.0);
         int min = w<h?w:h;
         for(int i=0; i<min; i++) {
-            m->set(i,i, 1.0/get(i,i));
+            m.set(i,i, 1.0/get(i,i));
         }
     }
     if (std::fabs(det()) < 0.01)
-        return nullptr;
+        return Matrix(1);
 
     if (w == 2 && h == 2) {
         double ad = 1 / det();
-        m->set(0, 0, ad * get(1, 1));
-        m->set(1, 0, -ad * get(1, 0));
-        m->set(0, 1, -ad * get(0, 1));
-        m->set(1, 1, ad * get(0, 0));
+        m.set(0, 0, ad * get(1, 1));
+        m.set(1, 0, -ad * get(1, 0));
+        m.set(0, 1, -ad * get(0, 1));
+        m.set(1, 1, ad * get(0, 0));
     }
 
     return m;
@@ -171,7 +187,7 @@ Matrix Matrix::operator*(Matrix &m) {
 
 Matrix Matrix::operator*(const double v) {
     Matrix m(w,h);
-    if(omp_in_parallel()) {
+    if(!omp_in_parallel()) {
         for (int x = 0; x < w; x++) {
             for (int y = 0; y < h; y++) {
                 m.set(x, y, get(x, y) * v);
@@ -196,4 +212,28 @@ Matrix Matrix::transpose() {
         }
     }
     return m;
+}
+
+Vec Matrix::operator*(Vec &b) {
+    Vec v(b.getSize());
+    if (!omp_in_parallel()) {
+        #pragma omp parallel for
+        for (int y = 0; y < b.getSize(); y++) {
+            double s = 0;
+            for (int i = 0; i < b.getSize(); i++) {
+                s += b[i] * get(i, y);
+            }
+            v.set(y, s);
+        }
+
+    } else {
+        for (int y = 0; y < b.getSize(); y++) {
+            double s = 0;
+            for (int i = 0; i < b.getSize(); i++) {
+                s += b[i] * get(i, y);
+            }
+            v.set(y, s);
+        }
+    }
+    return v;
 }
