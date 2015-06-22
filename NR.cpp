@@ -22,25 +22,25 @@ NR::NR(Fun1 &f) {
 // metoda Brenta
 
 
-//double goldenRatio(pt &a, pt &b, Fun1 &f) {
-//    double epsilon = 0.0001;
-//    double k = (std::sqrt(5) - 1) / 2;
-//    pt xL = b - k * (b - a);
-//    pt xR = a + k * (b - a);
-//    while ((b - a) > epsilon) {
-//        if (f.get(xL) < f.get(xR)) {
-//            b = xR;
-//            xR = xL;
-//            xL = b - k * (b - a);
-//        }
-//        else {
-//            a = xL;
-//            xL = xR;
-//            xR = a + k * (b - a);
-//        }
-//    }
-//    return (a + b) / 2;
-//}
+Vec goldenRatio(Vec &a, Vec &b, Fun1 &f) {
+    double epsilon = 0.001;
+    double k = (std::sqrt(5) - 1) / 2;
+    Vec xL = b - k * (b - a);
+    Vec xR = a + k * (b - a);
+    while ((b - a).d() > epsilon) {
+        if (f(xL) < f(xR)) {
+            b = xR;
+            xR = xL;
+            xL = b - k * (b - a);
+        }
+        else {
+            a = xL;
+            xL = xR;
+            xR = a + k * (b - a);
+        }
+    }
+    return (a + b) / 2;
+}
 /*\
  * H - jednostkowa
  * iteracja M

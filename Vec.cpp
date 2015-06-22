@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include <stdio.h>
+#include <cmath>
 
 Vec::Vec(int size) {
     data = new double[size];
@@ -16,11 +17,11 @@ Vec::~Vec() {
     delete data;
 }
 
-double Vec::get(int i) {
+const double Vec::get(int i) {
     assert(i<size);
     return data[i];
 }
-double Vec::operator()(const int i) {
+const double Vec::operator()(const int i) {
     return get(i);
 }
 
@@ -29,10 +30,83 @@ void Vec::set(int i, double v) {
     data[i] = v;
 }
 
-void Vec::dump() {
+const void Vec::dump() {
     printf("Vector(%d)\n [", size);
     for(int i=0; i<size; i++){
         printf("%lf ", get(i));
     }
     printf("]\n");
+}
+
+const int Vec::getSize() {
+    return size;
+}
+
+
+Vec Vec::operator+(const Vec &b) {
+    assert(size == b.size);
+    Vec v(size);
+    for(int i=0; i<size; i++){
+        v.set(i, get(i)+b(i));
+    }
+    return v;
+}
+
+Vec Vec::operator-(const Vec &b) {
+    assert(size == b.size);
+    Vec v(size);
+    for(int i=0; i<size; i++){
+        v.set(i, get(i)-b(i));
+    }
+    return v;
+}
+
+Vec Vec::operator*(const Vec &b) {
+    assert(size == b.size);
+    Vec v(size);
+    for(int i=0; i<size; i++){
+        v.set(i, get(i)*b(i));
+    }
+    return v;
+}
+
+Vec Vec::operator/(const Vec &b) {
+    assert(size == b.size);
+    Vec v(size);
+    for(int i=0; i<size; i++){
+        v.set(i, get(i)/b(i));
+    }
+    return v;
+}
+
+Vec Vec::operator*(double b) {
+    Vec v(size);
+    for(int i=0; i<size; i++){
+        v.set(i, get(i)*b);
+    }
+    return v;
+}
+
+Vec operator*(double a, const Vec &b) {
+    Vec v(size);
+    for(int i=0; i<size; i++){
+        v.set(i, a*b(i));
+    }
+    return v;
+}
+
+Vec Vec::operator/(double b) {
+    Vec v(size);
+    for(int i=0; i<size; i++){
+        v.set(i, get(i)/b);
+    }
+    return v;
+}
+
+double Vec::d() {
+    double v = 0;
+    for(int i=0; i<size; i++){
+        v += get(i)*get(i);
+    }
+    return std::sqrt(v);
 }

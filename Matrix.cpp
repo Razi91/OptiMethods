@@ -95,30 +95,26 @@ double Matrix::det() {
     return d;
 }
 
-Matrix *Matrix::reverse() {
+Matrix *Matrix::reverse(bool isDiagonal) {
     assert(w==h);
-    Matrix *m = new Matrix(w, w);
+    Matrix *m = new Matrix(w, h);
+    if(isDiagonal){
+        std::fill(m->data, m->data+w*h, 0.0);
+        int min = w<h?w:h;
+        for(int i=0; i<min; i++) {
+            m->set(i,i, 1.0/get(i,i));
+        }
+    }
     if (std::fabs(det()) < 0.01)
         return nullptr;
 
-    if (w == 2) {
+    if (w == 2 && h == 2) {
         double ad = 1 / det();
         m->set(0, 0, ad * get(1, 1));
         m->set(1, 0, -ad * get(1, 0));
         m->set(0, 1, -ad * get(0, 1));
         m->set(1, 1, ad * get(0, 0));
     }
-
-
-//    double t[w+w-1][w];
-//    for(int y=0; y<w; y++){
-//        for(int x=0; x<w+w-1; x++) {
-//            if (x<w)
-//                t[x][y] = get(x,y);
-//            else
-//                t[x][y] = get(x-w, y);
-//        }
-//    }
 
     return m;
 }

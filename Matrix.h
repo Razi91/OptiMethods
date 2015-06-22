@@ -24,7 +24,7 @@ public:
     void set(const int x, const int y, double val);
 
     Vec* mul(Vec *v);
-    Matrix* reverse();
+    Matrix* reverse(bool isDiagonal=lfalse);
 
     double det();
 

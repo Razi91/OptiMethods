@@ -8,35 +8,22 @@
 #include "Matrix.h"
 #include "Vec.h"
 
-enum Dir { X=0, Y=1 };
-
 class Function {
 public:
 
-    virtual double operator()(const double x, const double y) = 0;
-    double get(const double x, const double y);
-    double get(const pt &p);
-    double operator()(pt p);
+    virtual double get(const Vec &x) = 0;
+    virtual double operator()(const Vec &x) = 0;
 
-    virtual Matrix* getHessan(const double x, const double y);
-    virtual Vec* getGradient(const double x, const double y);
 
-    Matrix* getHessan(const pt &y);
-    Vec* getGradient(const pt &y);
+    virtual Matrix getHessan(const Vec &x);
+    virtual Vec getGradient(const Vec &x);
 };
 
 class Derivative : public Function {
     Function *f;
+    unsigned dir;
 public:
-
-    Derivative(Function *f, Dir dir);
-
-    virtual double operator()(double x, double y);
-protected:
-
-    Dir dir;
-
+    Derivative(Function *f, unsigned dir);
 };
-
 
 #endif //METODY_FUNCTION_H
