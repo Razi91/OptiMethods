@@ -34,6 +34,7 @@ public:
 
     Matrix transpose();
 
+    Matrix operator+(Matrix &m);
     Matrix operator*(Matrix &m);
     Vec operator*(Vec &v);
     Matrix operator*(const double v);

@@ -21,6 +21,7 @@ public:
     NR(Function *f) {
         this->f = f;
     };
+
     Vec getLowest(Vec &x) {
         Vec np = x;
         double epsilon = 0.0001;
@@ -34,9 +35,36 @@ public:
             Vec E = Hp * g;
             i++;
             np += E;
-            if ((x-np).d() < epsilon)
+            if ((x - np).d() < epsilon)
                 return np;
             x = np;
+        }
+        return x;
+    }
+};
+
+class NR2 {
+    Function *f;
+public:
+    NR2(Function *f) {
+        this->f = f;
+    };
+
+    Vec getLowest(Vec &x) {
+        Vec np = x;
+        double epsilon = 0.0001;
+        const int max_iter = 50;
+        int i = 0;
+        Matrix H = Matrix::identity(x.getSize());
+        while (i < max_iter) {
+            Matrix A(x.getSize());
+            Vec B(x.getSize());
+            Vec g = f->getGradient(x);
+            Vec di = -(H * g);
+            Vec xn = x + di; //TODO: minfun
+            Matrix dit = di.transpose();
+            H = H + (dit * di) * (((dit * A) * di).reverse()) * B;
+            i++;
         }
         return x;
     }
@@ -74,7 +102,6 @@ Vec goldenRatio(Vec &a, Vec &b, Fun1 &f) {
 //    }
 //    return (a + b) / 2;
 }
-
 
 
 #endif //METODY_NR_H

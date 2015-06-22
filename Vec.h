@@ -5,6 +5,7 @@
 #ifndef METODY_VEC_H
 #define METODY_VEC_H
 
+class Matrix;
 
 class Vec {
     double *data __attribute__ ((aligned(16)));
@@ -22,6 +23,11 @@ public:
     double get(const int i);
 
     double operator[](const int i);
+    void set(int i, double v);
+
+    Matrix transpose();
+
+    Vec operator-();
 
     Vec operator+(Vec &b);
     Vec operator-(Vec &b);
@@ -38,10 +44,8 @@ public:
 
     double d();
 
-    void set(int i, double v);
 
     const void dump();
-
     friend class Matrix;
 };
 

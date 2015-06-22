@@ -3,6 +3,7 @@
 //
 
 #include "Vec.h"
+#include "Matrix.h"
 
 #include <cassert>
 #include <stdio.h>
@@ -54,7 +55,13 @@ int Vec::getSize() {
     return size;
 }
 
-
+Vec Vec::operator-() {
+    Vec v(size);
+    for (int i = 0; i < size; i++)
+        v.data[i] = -get(i);
+    return v;
+}
+//////////////////////////////////////////////
 Vec Vec::operator+(Vec &b) {
     assert(size == b.size);
     Vec v(size);
@@ -144,4 +151,11 @@ double Vec::d() {
         v += get(i) * get(i);
     }
     return std::sqrt(v);
+}
+
+Matrix Vec::transpose() {
+    Matrix m(size, 1);
+    for(int i=0; i<size; i++)
+        m.set(i, 0, data[i]);
+    return m;
 }
