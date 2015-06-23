@@ -29,15 +29,16 @@ public:
         int i = 0;
         //Matrix H = Matrix::identity(x.getSize());
         while (i < max_iter) {
-            Matrix H = f->getHessan(x);
-            Vec g = f->getGradient(x);
-            Matrix Hp = H.reverse();
-            Vec E = Hp * g;
-            i++;
-            np += E;
-            if ((x - np).d() < epsilon)
-                return np;
-            x = np;
+//            Matrix &&H = f->getHessan(x);
+//            Vec &&g = f->getGradient(x);
+//            Matrix &&Hp = H.reverse();
+//            //Vec&& E = Hp * g;
+//            //Vec E = H.reverse()
+//            i++;
+//            np = np + E;
+//            if ((x - np).d() < epsilon)
+//                return np;
+//            x = np;
         }
         return x;
     }
@@ -63,7 +64,15 @@ public:
             Vec di = -(H * g);
             Vec xn = x + di; //TODO: minfun
             Matrix dit = di.transpose();
-            H = H + (dit * di) * (((dit * A) * di).reverse()) * B;
+
+            Vec gi = f->getGradient(x);
+            Vec alpha = xn - x;
+            Matrix alphaT = alpha.transpose();
+
+            Vec gamma = gi - g;
+
+            Matrix m1 = (alpha * alphaT) * (alphaT * gamma).reverse();
+            //H = H + (dit * di) * ((dit * A * di).reverse()) * B;
             i++;
         }
         return x;
@@ -84,9 +93,9 @@ public:
 
 
 Vec goldenRatio(Vec &a, Vec &b, Fun1 &f) {
-//    double epsilon = 0.001;
-//    double k = (std::sqrt(5) - 1) / 2;
-//    Vec xL = b - k * (b - a);
+    double epsilon = 0.001;
+    double k = (std::sqrt(5) - 1) / 2;
+    Vec xL = b - k * (b - a);
 //    Vec xR = a + k * (b - a);
 //    while ((b - a).d() > epsilon) {
 //        if (f(xL) < f(xR)) {

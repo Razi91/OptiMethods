@@ -29,26 +29,31 @@ public:
 
     Vec operator-();
 
-    Vec operator+(Vec &b);
-    Vec operator-(Vec &b);
-    Vec operator*(Vec &b);
-    Vec operator/(Vec &b);
 
-    Vec operator+=(Vec &b);
-    Vec operator-=(Vec &b);
-    Vec operator*=(Vec &b);
-    Vec operator/=(Vec &b);
 
-    Vec operator*(const double b);
-    Vec operator/(const double b);
+    Vec reverse();
 
     double d();
+
 
 
     const void dump();
     friend class Matrix;
 };
+Vec operator+(Vec &a, Vec &b);
+Vec operator-(Vec &a, Vec &b);
+Vec operator*(Vec &a, Vec &b);
+Vec operator/(Vec &a, Vec &b);
 
+Vec operator+=(Vec &a, Vec &b);
+Vec operator-=(Vec &a, Vec &b);
+Vec operator*=(Vec &a, Vec &b);
+Vec operator/=(Vec &a, Vec &b);
+
+Vec operator*(Vec &a, const double b);
+Vec operator/(Vec &a, const double b);
+
+Matrix operator*(Vec &a, Matrix &b);
 Vec operator*(const double a, const Vec &b);
 
 #endif //METODY_VEC_H

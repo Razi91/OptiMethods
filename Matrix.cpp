@@ -57,20 +57,6 @@ void Matrix::set(const int x, const int y, double val) {
 }
 
 
-Vec *Matrix::mul(Vec *v) {
-    assert(v->size == w);
-    Vec *n = new Vec(w);
-#pragma omp parallel for
-    for (int i = 0; i < w; i++) {
-        double val = 0;
-        for (int x = 0; x < w; x++) {
-            val += v->get(x) * get(x, i);
-        }
-        n->set(i, val);
-    }
-    return n;
-}
-
 void Matrix::dump() {
     printf("Matrix(%d)\n", w);
     for (int y = 0; y < h; y++) {
@@ -124,7 +110,7 @@ Matrix Matrix::reverse(bool isDiagonal) {
     if (std::fabs(det()) < 0.01)
         return Matrix(1);
 
-    if (w == 2 && h == 2) {
+    if (w == 2 & h == 2) {
         double ad = 1 / det();
         m.set(0, 0, ad * get(1, 1));
         m.set(1, 0, -ad * get(1, 0));
@@ -144,7 +130,7 @@ Matrix Matrix::identity(int s) {
 }
 
 Matrix Matrix::operator+(Matrix &m) {
-    assert(w == m.w && h == m.h);
+    assert(w == m.w & h == m.h);
     Matrix n(m.w, h);
     for (int x = 0; x < m.w; x++) {
         for (int y = 0; y < h; y++) {
@@ -169,7 +155,7 @@ __global__ void MatrixMul( double *Md , double *Nd , double *Pd , const int WIDT
 #endif
 
 Matrix Matrix::operator*(Matrix &m) {
-    assert(w == m.h && h == m.w);
+    assert(w == m.h & h == m.w);
     Matrix n(m.w, h);
     if (omp_in_parallel()) {
 #pragma omp parallel for

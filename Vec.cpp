@@ -46,7 +46,7 @@ void Vec::set(int i, const double v) {
 const void Vec::dump() {
     printf("Vector(%d)\n [", size);
     for (int i = 0; i < size; i++) {
-        printf("%lf ", get(i));
+        printf("%lf ", data[i]);
     }
     printf("]\n");
 }
@@ -58,45 +58,45 @@ int Vec::getSize() {
 Vec Vec::operator-() {
     Vec v(size);
     for (int i = 0; i < size; i++)
-        v.data[i] = -get(i);
+        v.data[i] = -data[i];
     return v;
 }
 //////////////////////////////////////////////
-Vec Vec::operator+(Vec &b) {
+Vec operator+(Vec &a, Vec &b) {
     assert(size == b.size);
     Vec v(size);
     for (int i = 0; i < size; i++)
-        v.data[i] = (get(i) + b[i]);
+        v.data[i] = (a.data[i] + b[i]);
     return v;
 }
 
-Vec Vec::operator-(Vec &b) {
-    assert(size == b.size);
-    Vec v(size);
-    for (int i = 0; i < size; i++)
-        v.data[i] = (get(i) - b[i]);
+Vec operator-(Vec &a, Vec &b) {
+    assert(a.size == b.size);
+    Vec v(a.size);
+    for (int i = 0; i < a.size; i++)
+        v.data[i] = (a.data[i] - b[i]);
     return v;
 }
 
-Vec Vec::operator*(Vec &b) {
-    assert(size == b.size);
-    Vec v(size);
-    for (int i = 0; i < size; i++)
-        v.data[i] = (get(i) * b[i]);
+Vec operator*(Vec &a, Vec &b) {
+    assert(a.size == b.size);
+    Vec v(a.size);
+    for (int i = 0; i < a.size; i++)
+        v.data[i] = (a.data[i] * b[i]);
     return v;
 }
 
-Vec Vec::operator/(Vec &b) {
-    assert(size == b.size);
+Vec operator/(Vec &a, Vec &b) {
+    assert(a.size == b.size);
     Vec v(size);
-    for (int i = 0; i < size; i++)
-        v.data[i] = (get(i) / b[i]);
+    for (int i = 0; i < a.size; i++)
+        v.data[i] = (a.data[i] / b[i]);
     return v;
 }
-Vec Vec::operator*(const double b) {
-    Vec v(size);
-    for (int i = 0; i < size; i++)
-        v.data[i] = (get(i) * b);
+Vec operator*(Vec &a, const double b) {
+    Vec v(a.size);
+    for (int i = 0; i < a.size; i++)
+        v.data[i] = (a.data[i] * b);
     return v;
 }
 
@@ -104,10 +104,10 @@ Vec operator*(double a, Vec &b) {
     return b * a;
 }
 
-Vec Vec::operator/(const double b) {
-    Vec v(size);
-    for (int i = 0; i < size; i++) {
-        v.data[i] = (get(i) / b);
+Vec operator/(Vec &a, const double b) {
+    Vec v(a.size);
+    for (int i = 0; i < a.size; i++) {
+        v.data[i] = (a.data[i] / b);
     }
     return v;
 }
@@ -116,34 +116,41 @@ Vec Vec::operator/(const double b) {
 
 
 ///////////////////////////////////////////////////
-Vec Vec::operator+=(Vec &b) {
+Vec operator+=(Vec &a, Vec &b) {
     assert(size == b.size);
-    for (int i = 0; i < size; i++)
-        data[i] = (get(i) + b[i]);
-    return *this;
+    for (int i = 0; i < a.size; i++)
+        data[i] = (a.data[i] + b[i]);
+    return a;
 }
 
-Vec Vec::operator-=(Vec &b) {
+Vec operator-=(Vec &a, Vec &b) {
     assert(size == b.size);
-    for (int i = 0; i < size; i++)
-        data[i] = (get(i) - b[i]);
-    return *this;
+    for (int i = 0; i < a.size; i++)
+        data[i] = (data[i] - b[i]);
+    return a;
 }
 
-Vec Vec::operator*=(Vec &b) {
+Vec operator*=(Vec &a, Vec &b) {
     assert(size == b.size);
-    for (int i = 0; i < size; i++)
-        data[i] = (get(i) * b[i]);
-    return *this;
+    for (int i = 0; i < a.size; i++)
+        a.data[i] = (a.data[i] * b[i]);
+    return a;
 }
 
-Vec Vec::operator/=(Vec &b) {
-    assert(size == b.size);
-    for (int i = 0; i < size; i++)
-        data[i] = (get(i) / b[i]);
-    return *this;
+Vec operator/=(Vec &a, Vec &b) {
+    assert(a.size == b.size);
+    for (int i = 0; i < a.size; i++)
+        a.data[i] = (a.data[i] / b[i]);
+    return a;
 }
 ///////////////////////////////////////////////////////
+
+Vec Vec::reverse() {
+    Vec v(size);
+    for (int i = 0; i < size; i++)
+        v.data[i] = 1/data[i];
+    return Vec(0);
+}
 
 double Vec::d() {
     double v = 0;
@@ -157,5 +164,15 @@ Matrix Vec::transpose() {
     Matrix m(size, 1);
     for(int i=0; i<size; i++)
         m.set(i, 0, data[i]);
+    return m;
+}
+
+
+Matrix Vec::operator*(Matrix &b) {
+    assert(size == b.w & b.h == 1);
+    Matrix m(size);
+    for(int x=0; x<size; x++)
+        for(int y=0; y<size; y++)
+            m.set(x,y, b.get(x,0) * get(y));
     return m;
 }
