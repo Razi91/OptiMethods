@@ -170,7 +170,7 @@ __global__ void MatrixMul( double *Md , double *Nd , double *Pd , const int WIDT
 #endif
 
 Matrix Matrix::operator*(const Matrix &m) {
-    assert(w == m.h & h == m.w);
+    assert(w == m.h);
     Matrix n(m.w, h);
     if (omp_in_parallel()) {
 #pragma omp parallel for

@@ -13,7 +13,7 @@
 #include "utils.h"
 #include "Fun1.h"
 
-Vec goldenRatio(Vec a, Vec b, Function &f);
+Vec goldenRatio(Vec a, Vec b, Function *f);
 
 class NewtonRaphson {
     Function *f;
@@ -36,7 +36,7 @@ public:
             np = np + E;
             if ((x - np).d() < epsilon)
                 return np;
-            x = goldenRatio(x, np, *f);
+            x = goldenRatio(x, np, f);
         }
         return x;
     }
@@ -60,7 +60,7 @@ public:
             Vec B(x.getSize());
             Vec g = f->getGradient(x);
             Vec di = -(H * g);
-            Vec xn = x + di; //TODO: minfun
+            Vec xn = goldenRatio(x, x + di, f); //TODO: minfun
             Matrix dit = di.transpose();
 
             Vec gi = f->getGradient(x);
@@ -91,7 +91,7 @@ public:
 
 // metoda Brenta
 
-Vec goldenRatio(Vec a, Vec b, Function &f) {
+Vec goldenRatio(Vec a, Vec b, Function *f) {
     double epsilon = 0.001;
     double k = (std::sqrt(5) - 1) / 2;
     Vec xL = b - k * (b - a);
@@ -99,8 +99,8 @@ Vec goldenRatio(Vec a, Vec b, Function &f) {
     while ((b - a).d() > epsilon) {
         double L;
         double R;
-        L = f(xL);
-        R = f(xR);
+        L = f->get(xL);
+        R = f->get(xR);
         if (L < R) {
             b = xR;
             xR = xL;

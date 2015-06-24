@@ -13,9 +13,8 @@ class Vec {
 
 public:
     Vec(const int size);
-
     Vec(const Vec &v);
-
+    Vec& operator=(const Vec &v);
     ~Vec();
 
     int getSize() const;

@@ -28,6 +28,16 @@ Vec::~Vec() {
     delete data;
 }
 
+Vec& Vec::operator=(const Vec &v){
+    if ( size != v.size) {
+        delete data;
+        int x = size&1;
+        data = new double[x?(size+16)&(~x):size];
+    }
+    memcpy(data, v.data, sizeof(double) * size);
+    return *this;
+}
+
 double Vec::get(const int i) const {
     assert(i < size);
     return data[i];
