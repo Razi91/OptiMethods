@@ -5,8 +5,6 @@
 #ifndef METODY_MATRIX_H
 #define METODY_MATRIX_H
 
-
-#include "utils.h"
 #include "Vec.h"
 
 class Matrix {
@@ -14,29 +12,33 @@ class Matrix {
     int w;
     int h;
 public:
-    Matrix(int w, int h);
-    Matrix(int w);
+    Matrix(const int w, const int h);
+    Matrix(const int w);
     Matrix(const Matrix &m);
-    Matrix& operator=(Matrix &m);
-    static Matrix identity(int s);
+    Matrix& operator=(Matrix &&m);
     ~Matrix();
 
-    double get(const int x, const int y);
-    double operator()(const int x, const int y);
+    static Matrix identity(const int s);
+
+    double get(const int x, const int y) const;
+    double & operator()(const int x, const int y) const;
     void set(const int x, const int y, double val);
 
-    Matrix reverse(bool isDiagonal=false);
+    Matrix reverse(bool isDiagonal=false) const;
 
-    double det();
+    double det() const;
 
-    void dump();
+    void dump() const;
 
-    Matrix transpose();
+    Matrix transpose() const;
 
-    Matrix operator+(Matrix &m);
-    Matrix operator*(Matrix &m);
-    Vec operator*(Vec &v);
+    Matrix operator+(const Matrix &m);
+    Matrix operator-(const Matrix &m);
+    Matrix operator*(const Matrix &m);
+    Matrix operator/(const Matrix &m);
+    Vec operator*(const Vec &v);
     Matrix operator*(const double v);
+    Matrix operator/(const double v);
 
     friend class Vec;
 };

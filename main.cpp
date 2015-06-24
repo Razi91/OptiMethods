@@ -6,14 +6,6 @@
 using namespace std;
 
 int main() {
-//
-//    int s = 4;
-//    Matrix m(s);
-//    for(int x=0; x<s; x++)
-//        for(int y=0; y<s; y++)
-//            m.set(x,y,rand()%11+2);
-//    printf("%lf\n", m.det());
-//    printf("\n\n");
 
     Fun1 *f = new Fun1();
     Vec v(2);
@@ -22,10 +14,17 @@ int main() {
 
     f->getGradient(v).dump();
     f->getHessan(v).dump();
+    {
+//        NewtonRaphson n(f);
+//        Vec x = n.getLowest(v);
+//        x.dump();
+    }
 
-    //NR n(f);
-    //Vec x = n.getLowest(v);
-    //x.dump();
+    {
+        Davidon n(f);
+        Vec x = n.getLowest(v);
+        x.dump();
+    }
 
     return 0;
 }

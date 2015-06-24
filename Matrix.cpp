@@ -11,13 +11,13 @@
 #include <algorithm>
 #include <omp.h>
 
-Matrix::Matrix(int w, int h) {
+Matrix::Matrix(const int w, const int h) {
     this->w = w;
     this->h = h;
     this->data = new double[w * h];
 }
 
-Matrix::Matrix(int w) {
+Matrix::Matrix(const int w) {
     this->w = w;
     this->h = w;
     this->data = new double[w * w];
@@ -34,7 +34,7 @@ Matrix::Matrix(const Matrix &m) {
     memcpy(data, m.data, w * h * sizeof(double));
 }
 
-Matrix &Matrix::operator=(Matrix &m) {
+Matrix &Matrix::operator=(Matrix &&m) {
     this->~Matrix();
     this->w = m.w;
     this->h = m.h;
@@ -43,12 +43,12 @@ Matrix &Matrix::operator=(Matrix &m) {
     return *this;
 }
 
-double Matrix::get(const int x, const int y) {
+double Matrix::get(const int x, const int y) const {
     return data[x + y * w];
 }
 
-double Matrix::operator()(const int x, const int y) {
-    return get(x, y);
+double & Matrix::operator()(const int x, const int y) const {
+    return data[x + y * w];
 }
 
 
@@ -57,7 +57,7 @@ void Matrix::set(const int x, const int y, double val) {
 }
 
 
-void Matrix::dump() {
+void Matrix::dump() const {
     printf("Matrix(%d)\n", w);
     for (int y = 0; y < h; y++) {
         printf("| ");
@@ -70,7 +70,7 @@ void Matrix::dump() {
 
 }
 
-double Matrix::det() {
+double Matrix::det() const {
     assert(w == h);
     dump();
     if (w == 2) {
@@ -97,7 +97,7 @@ double Matrix::det() {
     return d;
 }
 
-Matrix Matrix::reverse(bool isDiagonal) {
+Matrix Matrix::reverse(bool isDiagonal)const {
     assert(w == h);
     Matrix m(w, h);
     if (isDiagonal) {
@@ -110,7 +110,11 @@ Matrix Matrix::reverse(bool isDiagonal) {
     if (std::fabs(det()) < 0.01)
         return Matrix(1);
 
-    if (w == 2 & h == 2) {
+    if (w == 1 && h == 1){
+        m(0,0) = 1.0/get(0,0);
+    }
+
+    if (w == 2 && h == 2) {
         double ad = 1 / det();
         m.set(0, 0, ad * get(1, 1));
         m.set(1, 0, -ad * get(1, 0));
@@ -121,20 +125,31 @@ Matrix Matrix::reverse(bool isDiagonal) {
     return m;
 }
 
-Matrix Matrix::identity(int s) {
+Matrix Matrix::identity(const int s) {
     Matrix m(s, s);
     const double zero = 0.0;
     std::fill(m.data, m.data + s * s, zero);
     for (int i = 0; i < s; i++)
         m.set(i, i, 1);
+    return m;
 }
 
-Matrix Matrix::operator+(Matrix &m) {
+Matrix Matrix::operator+(const Matrix &m) {
     assert(w == m.w & h == m.h);
     Matrix n(m.w, h);
     for (int x = 0; x < m.w; x++) {
         for (int y = 0; y < h; y++) {
             n.set(x, y, get(x, y) + n.get(x, y));
+        }
+    }
+    return n;
+}
+Matrix Matrix::operator-(const Matrix &m) {
+    assert(w == m.w & h == m.h);
+    Matrix n(m.w, h);
+    for (int x = 0; x < m.w; x++) {
+        for (int y = 0; y < h; y++) {
+            n.set(x, y, get(x, y) - n.get(x, y));
         }
     }
     return n;
@@ -154,7 +169,7 @@ __global__ void MatrixMul( double *Md , double *Nd , double *Pd , const int WIDT
 }
 #endif
 
-Matrix Matrix::operator*(Matrix &m) {
+Matrix Matrix::operator*(const Matrix &m) {
     assert(w == m.h & h == m.w);
     Matrix n(m.w, h);
     if (omp_in_parallel()) {
@@ -182,6 +197,10 @@ Matrix Matrix::operator*(Matrix &m) {
     return n;
 }
 
+Matrix Matrix::operator/(const Matrix &m) {
+    return this->operator*(m.reverse());
+}
+
 Matrix Matrix::operator*(const double v) {
     Matrix m(w, h);
     if (!omp_in_parallel()) {
@@ -200,8 +219,26 @@ Matrix Matrix::operator*(const double v) {
     }
     return m;
 }
+Matrix Matrix::operator/(const double v) {
+    Matrix m(w, h);
+    if (!omp_in_parallel()) {
+        for (int x = 0; x < w; x++) {
+            for (int y = 0; y < h; y++) {
+                m.set(x, y, get(x, y) / v);
+            }
+        }
+    } else {
+#pragma omp parallel for
+        for (int x = 0; x < w; x++) {
+            for (int y = 0; y < h; y++) {
+                m.set(x, y, get(x, y) / v);
+            }
+        }
+    }
+    return m;
+}
 
-Matrix Matrix::transpose() {
+Matrix Matrix::transpose() const {
     Matrix m(h, w);
     for (int x = 0; x < w; x++) {
         for (int y = 0; y < h; y++) {
@@ -211,22 +248,23 @@ Matrix Matrix::transpose() {
     return m;
 }
 
-Vec Matrix::operator*(Vec &b) {
-    Vec v(b.getSize());
+Vec Matrix::operator*(const Vec &b) {
+    assert(w == b.getSize());
+    Vec v(h);
     if (!omp_in_parallel()) {
 #pragma omp parallel for
-        for (int y = 0; y < b.getSize(); y++) {
+        for (int y = 0; y < h; y++) {
             double s = 0;
-            for (int i = 0; i < b.getSize(); i++) {
+            for (int i = 0; i < w; i++) {
                 s += b[i] * get(i, y);
             }
             v.set(y, s);
         }
 
     } else {
-        for (int y = 0; y < b.getSize(); y++) {
+        for (int y = 0; y < h; y++) {
             double s = 0;
-            for (int i = 0; i < b.getSize(); i++) {
+            for (int i = 0; i < w; i++) {
                 s += b[i] * get(i, y);
             }
             v.set(y, s);

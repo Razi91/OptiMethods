@@ -10,7 +10,7 @@
 #include <cmath>
 #include <string.h>
 
-Vec::Vec(int size) {
+Vec::Vec(const int size) {
     int x = size&1;
     data = new double[x?(size+16)&(~x):size];
     this->size = size;
@@ -28,14 +28,18 @@ Vec::~Vec() {
     delete data;
 }
 
-double Vec::get(const int i) {
+double Vec::get(const int i) const {
     assert(i < size);
     return data[i];
 }
 
-double Vec::operator[](const int i) {
+double & Vec::operator[](const int i) const {
     assert(i < size);
     return data[i];
+}
+double & Vec::v() const {
+    assert(size == 1);
+    return data[0];
 }
 
 void Vec::set(int i, const double v) {
@@ -51,7 +55,7 @@ const void Vec::dump() {
     printf("]\n");
 }
 
-int Vec::getSize() {
+int Vec::getSize() const {
     return size;
 }
 
@@ -62,52 +66,48 @@ Vec Vec::operator-() {
     return v;
 }
 //////////////////////////////////////////////
-Vec operator+(Vec &a, Vec &b) {
+Vec Vec::operator+(const Vec &b) const {
     assert(size == b.size);
     Vec v(size);
     for (int i = 0; i < size; i++)
-        v.data[i] = (a.data[i] + b[i]);
+        v.data[i] = (data[i] + b.data[i]);
     return v;
 }
 
-Vec operator-(Vec &a, Vec &b) {
-    assert(a.size == b.size);
-    Vec v(a.size);
-    for (int i = 0; i < a.size; i++)
-        v.data[i] = (a.data[i] - b[i]);
-    return v;
-}
-
-Vec operator*(Vec &a, Vec &b) {
-    assert(a.size == b.size);
-    Vec v(a.size);
-    for (int i = 0; i < a.size; i++)
-        v.data[i] = (a.data[i] * b[i]);
-    return v;
-}
-
-Vec operator/(Vec &a, Vec &b) {
-    assert(a.size == b.size);
+Vec Vec::operator-(const Vec &b) const {
+    assert(size == b.size);
     Vec v(size);
-    for (int i = 0; i < a.size; i++)
-        v.data[i] = (a.data[i] / b[i]);
-    return v;
-}
-Vec operator*(Vec &a, const double b) {
-    Vec v(a.size);
-    for (int i = 0; i < a.size; i++)
-        v.data[i] = (a.data[i] * b);
+    for (int i = 0; i < size; i++)
+        v.data[i] = (data[i] - b.data[i]);
     return v;
 }
 
-Vec operator*(double a, Vec &b) {
-    return b * a;
+Vec Vec::operator*(const Vec &b) const {
+    assert(size == b.size);
+    Vec v(size);
+    for (int i = 0; i < size; i++)
+        v.data[i] = (data[i] * b.data[i]);
+    return v;
 }
 
-Vec operator/(Vec &a, const double b) {
-    Vec v(a.size);
-    for (int i = 0; i < a.size; i++) {
-        v.data[i] = (a.data[i] / b);
+Vec Vec::operator/(const Vec &b) const {
+    assert(size == b.size);
+    Vec v(size);
+    for (int i = 0; i < size; i++)
+        v.data[i] = (data[i] / b.data[i]);
+    return v;
+}
+Vec Vec::operator*(const double b) const {
+    Vec v(size);
+    for (int i = 0; i < size; i++)
+        v.data[i] = (data[i] * b);
+    return v;
+}
+
+Vec Vec::operator/(const double b) const {
+    Vec v(size);
+    for (int i = 0; i < size; i++) {
+        v.data[i] = (data[i] / b);
     }
     return v;
 }
@@ -116,34 +116,54 @@ Vec operator/(Vec &a, const double b) {
 
 
 ///////////////////////////////////////////////////
-Vec operator+=(Vec &a, Vec &b) {
+Vec& Vec::operator+=(const Vec &b) {
     assert(size == b.size);
-    for (int i = 0; i < a.size; i++)
-        data[i] = (a.data[i] + b[i]);
-    return a;
+    for (int i = 0; i < size; i++)
+        data[i] = (data[i] + b.data[i]);
+    return *this;
 }
 
-Vec operator-=(Vec &a, Vec &b) {
+Vec& Vec::operator-=(const Vec &b) {
     assert(size == b.size);
-    for (int i = 0; i < a.size; i++)
-        data[i] = (data[i] - b[i]);
-    return a;
+    for (int i = 0; i < size; i++)
+        data[i] = (data[i] - b.data[i]);
+    return *this;
 }
 
-Vec operator*=(Vec &a, Vec &b) {
+Vec& Vec::operator*=(const Vec &b) {
     assert(size == b.size);
-    for (int i = 0; i < a.size; i++)
-        a.data[i] = (a.data[i] * b[i]);
-    return a;
+    for (int i = 0; i < size; i++)
+        data[i] = (data[i] * b.data[i]);
+    return *this;
 }
 
-Vec operator/=(Vec &a, Vec &b) {
-    assert(a.size == b.size);
-    for (int i = 0; i < a.size; i++)
-        a.data[i] = (a.data[i] / b[i]);
-    return a;
+Vec& Vec::operator/=(const Vec &b) {
+    assert(size == b.size);
+    for (int i = 0; i < size; i++)
+        data[i] = (data[i] / b.data[i]);
+    return *this;
+}
+
+Vec& Vec::operator*=(const double b) {
+    for (int i = 0; i < size; i++)
+        data[i] = (data[i] * b);
+    return *this;
+}
+
+Vec& Vec::operator/=(const double b) {
+    for (int i = 0; i < size; i++)
+        data[i] = (data[i] / b);
+    return *this;
 }
 ///////////////////////////////////////////////////////
+Matrix Vec::operator*(const Matrix &b) {
+    assert(size == b.w & b.h == 1);
+    Matrix m(size);
+    for(int x=0; x<size; x++)
+        for(int y=0; y<size; y++)
+            m.set(x,y, b.get(x,0) * get(y));
+    return m;
+}
 
 Vec Vec::reverse() {
     Vec v(size);
@@ -166,13 +186,10 @@ Matrix Vec::transpose() {
         m.set(i, 0, data[i]);
     return m;
 }
-
-
-Matrix Vec::operator*(Matrix &b) {
-    assert(size == b.w & b.h == 1);
-    Matrix m(size);
-    for(int x=0; x<size; x++)
-        for(int y=0; y<size; y++)
-            m.set(x,y, b.get(x,0) * get(y));
-    return m;
+////
+Vec operator*(const double a, const Vec &b) {
+    return b*a;
+}
+Vec operator/(const double a, const Vec &b) {
+    return b/a;
 }
