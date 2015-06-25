@@ -59,8 +59,8 @@ void Matrix::set(const int x, const int y, double val) {
 }
 
 
-void Matrix::dump() const {
-    printf("Matrix(%d)\n", w);
+void Matrix::dump(const char *str) const {
+    printf("Matrix(%d) %s\n", w, str);
     for (int y = 0; y < h; y++) {
         printf("| ");
         for (int x = 0; x < w; x++) {
@@ -179,7 +179,6 @@ Matrix Matrix::inverse(bool isDiagonal) const {
     } else { // dowolna
         // get the determinant of a
         double det = 1.0 / this->det();
-
 
         double **A = new double *[w];
         for (int i = 0; i < w; i++) {

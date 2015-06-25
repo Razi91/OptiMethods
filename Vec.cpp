@@ -70,10 +70,10 @@ void Vec::set(int i, const double v) {
     data[i] = v;
 }
 
-const void Vec::dump() {
-    printf("Vector(%d)\n [", size);
+const void Vec::dump(const char *str) {
+    printf("Vector(%d) %s\n [", size, str);
     for (int i = 0; i < size; i++) {
-        printf("%lf ", data[i]);
+        printf("%3.3lf ", data[i]);
     }
     printf("]\n");
 }

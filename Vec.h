@@ -55,7 +55,7 @@ public:
 
     double len() const;
 
-    const void dump();
+    const void dump(const char *str="");
     friend class Matrix;
 
 

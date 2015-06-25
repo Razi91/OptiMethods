@@ -29,7 +29,7 @@ public:
 
     double det() const;
 
-    void dump() const;
+    void dump(const char *str="") const;
 
     Matrix transpose() const;
 

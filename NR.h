@@ -24,22 +24,29 @@ public:
 
     Vec getLowest(Vec x) {
         Vec np = x;
-        double epsilon = 0.0001;
-        int max_iter = 100;
-        Matrix H(1);
+        double epsilon = 0.001;
+        int max_iter = 5;
+        Matrix H(x.getSize());
+        Matrix H1(x.getSize());
         Vec g = f->getGradient(x);
         while (max_iter--) {
-            H = f->getHessan(x).inverse();
+            H = f->getHessan(x);
+            H1 = H.inverse();
             g = f->getGradient(x);
+            H.dump("H");
+            H1.dump("H-1");
+            g.dump();
             Vec d = -(H * g);
-            // Vec x_i = goldenRatio(x, x+d, f);
-            Vec x_i = x + d;
+            Vec x_i = goldenRatio(x, x+d, f);
+            //Vec x_i = x + d;
             Vec g_i = f->getGradient(x_i);
             if ((x_i - x).len() < epsilon) {
                 return x_i;
             }
             x = x_i;
+            x.dump();
         }
+        printf("\nno\n");
         return x;
     }
 };
@@ -62,6 +69,7 @@ public:
         Vec x[n + 1];
         Matrix H[n + 1];
         Vec g[n + 1];
+        Vec tmp(p0.getSize());
         // 1
         x[0] = p0;
         H[0] = Matrix::identity(x[0].getSize());
@@ -72,7 +80,7 @@ public:
             Vec di = -(H[i - 1] * g[i - 1]);
             // 3 minimalizacja
             //Vec x_n = x + di;
-            auto tmp = x[i - 1] + di;
+            tmp = x[i - 1] + di;
             x[i] = goldenRatio(x[i - 1], tmp, f);
             alpha = x[i] - x[i - 1];
             alphaT = alpha.transpose();

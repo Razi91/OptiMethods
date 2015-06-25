@@ -13,6 +13,9 @@
 double Fun2::operator()(const Vec &x) {
     double v = 0;
     int s = x.getSize();
+    if (s == 2){
+        return 100*(x[1]-x[0])*(x[1]-x[0]) + (1-x[0])*(1-x[0]);
+    }
     #ifdef USE_CUDA
     double y[s];
 
@@ -36,6 +39,8 @@ double Fun2::operator()(const Vec &x) {
         p2 *= p2;
         v = v + p1 + p2;
     }
+    // 100*(y-x)^2 + (1-x)^2
+    // 1;1
     #endif
     return v;
 }

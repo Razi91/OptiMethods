@@ -63,7 +63,7 @@ Derivative::Derivative(Function *f, unsigned dir) {
 
 double Derivative::operator()(const Vec &x) {
     Function &fun = *f;
-    const double delta = std::max(fabs(x[p] * 0.0001), 0.0001);
+    const double delta = std::max(fabs(x[p] * 0.01), 0.01);
     const double fdelta = 1.0 / (delta * 2.0);
     Vec v = x;
     v.set(p, x[p] + delta);
