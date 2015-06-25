@@ -8,7 +8,7 @@
 
 class Fun1 : public Function {
 public:
-    virtual double operator()(Vec &x);
+    virtual double operator()(const Vec &x);
 
 };
 

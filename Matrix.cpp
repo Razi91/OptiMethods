@@ -34,11 +34,13 @@ Matrix::Matrix(const Matrix &m) {
     memcpy(data, m.data, w * h * sizeof(double));
 }
 
-Matrix &Matrix::operator=(Matrix &&m) {
-    this->~Matrix();
-    this->w = m.w;
-    this->h = m.h;
-    this->data = new double[w * h];
+Matrix &Matrix::operator=(const Matrix &m) {
+    if (h != m.h || w != m.w) {
+        delete data;
+        this->w = m.w;
+        this->h = m.h;
+        this->data = new double[w * h];
+    }
     memcpy(data, m.data, w * h * sizeof(double));
     return *this;
 }
@@ -47,7 +49,7 @@ double Matrix::get(const int x, const int y) const {
     return data[x + y * w];
 }
 
-double & Matrix::operator()(const int x, const int y) const {
+double &Matrix::operator()(const int x, const int y) const {
     return data[x + y * w];
 }
 
@@ -72,10 +74,12 @@ void Matrix::dump() const {
 
 double Matrix::det() const {
     assert(w == h);
-    dump();
-    if (w == 2) {
+    if (w == 1)
+        return get(0, 0);
+    else if (w == 2) {
         return get(0, 0) * get(1, 1) - get(1, 0) * get(0, 1);
-    } else if (w == 3) {
+    }
+    else if (w == 3) {
         return 0
                + get(0, 0) * get(1, 1) * get(2, 2)
                + get(0, 1) * get(1, 2) * get(2, 0)
@@ -97,7 +101,61 @@ double Matrix::det() const {
     return d;
 }
 
-Matrix Matrix::reverse(bool isDiagonal)const {
+int GetMinor(double **src, double **dest, int row, int col, int order) {
+    // indicate which col and row is being copied to dest
+    int colCount = 0, rowCount = 0;
+
+    for (int i = 0; i < order; i++) {
+        if (i != row) {
+            colCount = 0;
+            for (int j = 0; j < order; j++) {
+                // when j is not the element
+                if (j != col) {
+                    dest[rowCount][colCount] = src[i][j];
+                    colCount++;
+                }
+            }
+            rowCount++;
+        }
+    }
+
+    return 1;
+}
+
+// Calculate the determinant recursively.
+double CalcDeterminant(double **mat, int order) {
+    // order must be >= 0
+    // stop the recursion when matrix is a single element
+    if (order == 1)
+        return mat[0][0];
+
+    // the determinant value
+    double det = 0;
+
+    // allocate the cofactor matrix
+    double **minor;
+    minor = new double *[order - 1];
+    for (int i = 0; i < order - 1; i++)
+        minor[i] = new double[order - 1];
+
+    for (int i = 0; i < order; i++) {
+        // get minor of element (0,i)
+        GetMinor(mat, minor, 0, i, order);
+        // the recusion is here!
+
+        det += (i % 2 == 1 ? -1.0 : 1.0) * mat[0][i] * CalcDeterminant(minor, order - 1);
+        //det += pow( -1.0, i ) * mat[0][i] * CalcDeterminant( minor,order-1 );
+    }
+
+    // release memory
+    for (int i = 0; i < order - 1; i++)
+        delete[] minor[i];
+    delete[] minor;
+
+    return det;
+}
+
+Matrix Matrix::inverse(bool isDiagonal) const {
     assert(w == h);
     Matrix m(w, h);
     if (isDiagonal) {
@@ -110,16 +168,45 @@ Matrix Matrix::reverse(bool isDiagonal)const {
     if (std::fabs(det()) < 0.01)
         return Matrix(1);
 
-    if (w == 1 && h == 1){
-        m(0,0) = 1.0/get(0,0);
-    }
-
-    if (w == 2 && h == 2) {
+    if (w == 1 && h == 1) {
+        m(0, 0) = 1.0 / get(0, 0);
+    } else if (w == 2 && h == 2) {
         double ad = 1 / det();
         m.set(0, 0, ad * get(1, 1));
         m.set(1, 0, -ad * get(1, 0));
         m.set(0, 1, -ad * get(0, 1));
         m.set(1, 1, ad * get(0, 0));
+    } else { // dowolna
+        // get the determinant of a
+        double det = 1.0 / this->det();
+
+
+        double **A = new double *[w];
+        for (int i = 0; i < w; i++) {
+            A[i] = new double[w];
+            for (int j = 0; j < w; j++)
+                A[i][j] = get(i, j);
+        }
+        // memory allocation
+        double *temp = new double[(w - 1) * (w - 1)];
+        double **minor = new double *[w - 1];
+        for (int i = 0; i < w - 1; i++)
+            minor[i] = temp + (i * (w - 1));
+        #pragma omp parallel for
+        for (int j = 0; j < w; j++) {
+            for (int i = 0; i < w; i++) {
+                GetMinor(A, minor, j, i, w);
+                m.set(i, j, det * CalcDeterminant(minor, w - 1));
+                if ((i + j) % 2 == 1)
+                    m.set(i, j, -m.get(i, j));
+            }
+        }
+
+        // release memory
+        //delete [] minor[0];
+        delete[] temp;
+        delete[] minor;
+        delete[] A;
     }
 
     return m;
@@ -144,6 +231,7 @@ Matrix Matrix::operator+(const Matrix &m) {
     }
     return n;
 }
+
 Matrix Matrix::operator-(const Matrix &m) {
     assert(w == m.w & h == m.h);
     Matrix n(m.w, h);
@@ -198,7 +286,7 @@ Matrix Matrix::operator*(const Matrix &m) {
 }
 
 Matrix Matrix::operator/(const Matrix &m) {
-    return this->operator*(m.reverse());
+    return this->operator*(m.inverse());
 }
 
 Matrix Matrix::operator*(const double v) {
@@ -219,6 +307,7 @@ Matrix Matrix::operator*(const double v) {
     }
     return m;
 }
+
 Matrix Matrix::operator/(const double v) {
     Matrix m(w, h);
     if (!omp_in_parallel()) {

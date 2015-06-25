@@ -6,7 +6,7 @@
 #include "utils.h"
 
 
-Matrix Function::getHessan(Vec &x) {
+Matrix Function::getHessan(const Vec &x) {
     Matrix m(x.getSize());
     if (x.getSize() == 2) {
         Derivative dx(this, 0);
@@ -41,7 +41,7 @@ Matrix Function::getHessan(Vec &x) {
     return m;
 }
 
-Vec Function::getGradient(Vec &x) {
+Vec Function::getGradient(const Vec &x) {
     Vec v(x.getSize());
     #pragma omp parallel for
     for (unsigned int i = 0; i < x.getSize(); i++) {
@@ -61,7 +61,7 @@ Derivative::Derivative(Function *f, unsigned dir) {
 }
 
 
-double Derivative::operator()(Vec &x) {
+double Derivative::operator()(const Vec &x) {
     Function &fun = *f;
     const double delta = std::max(fabs(x[p] * 0.0001), 0.0001);
     const double fdelta = 1.0 / (delta * 2.0);
@@ -74,6 +74,6 @@ double Derivative::operator()(Vec &x) {
     return xv;
 }
 
-double Function::get(Vec &x) {
+double Function::get(const Vec &x) {
     return this->operator()(x);
 }

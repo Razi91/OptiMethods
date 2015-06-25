@@ -25,18 +25,20 @@ public:
     Vec getLowest(Vec x) {
         Vec np = x;
         double epsilon = 0.0001;
-        const int max_iter = 50;
-        int i = 0;
-        while (i < max_iter) {
-            Matrix H = f->getHessan(x);
-            Vec g = f->getGradient(x);
-            Matrix Hp = H.reverse();
-            Vec E = Hp * g;
-            i++;
-            np = np + E;
-            if ((x - np).d() < epsilon)
-                return np;
-            x = goldenRatio(x, np, f);
+        int max_iter = 100;
+        Matrix H(1);
+        Vec g = f->getGradient(x);
+        while (max_iter--) {
+            H = f->getHessan(x).inverse();
+            g = f->getGradient(x);
+            Vec d = -(H * g);
+            // Vec x_i = goldenRatio(x, x+d, f);
+            Vec x_i = x + d;
+            Vec g_i = f->getGradient(x_i);
+            if ((x_i - x).len() < epsilon) {
+                return x_i;
+            }
+            x = x_i;
         }
         return x;
     }
@@ -49,67 +51,76 @@ public:
         this->f = f;
     };
 
-    Vec getLowest(Vec &x) {
-        Vec np = x;
-        double epsilon = 0.0001;
+    Vec getLowest(const Vec &p0) {
+        const int n = p0.getSize();
+        int size = p0.getSize();
+        double epsilon = 0.001;
         const int max_iter = 50;
         int i = 0;
-        Matrix H = Matrix::identity(x.getSize());
-        while (i < max_iter) {
-            Matrix A(x.getSize());
-            Vec B(x.getSize());
-            Vec g = f->getGradient(x);
-            Vec di = -(H * g);
-            Vec xn = goldenRatio(x, x + di, f); //TODO: minfun
-            Matrix dit = di.transpose();
-
-            Vec gi = f->getGradient(x);
-            Vec alpha = xn - x;
-            Matrix alphaT = alpha.transpose();
-
-            Vec gamma = gi - g;
-            Matrix gammaT = gamma.transpose();
-
+        Vec alpha, gamma;
+        Matrix alphaT, gammaT;
+        Vec x[n + 1];
+        Matrix H[n + 1];
+        Vec g[n + 1];
+        // 1
+        x[0] = p0;
+        H[0] = Matrix::identity(x[0].getSize());
+        g[0] = f->getGradient(x[0]);
+        i = 1;
+        while (true) {
+            // 2
+            Vec di = -(H[i - 1] * g[i - 1]);
+            // 3 minimalizacja
+            //Vec x_n = x + di;
+            auto tmp = x[i - 1] + di;
+            x[i] = goldenRatio(x[i - 1], tmp, f);
+            alpha = x[i] - x[i - 1];
+            alphaT = alpha.transpose();
+            // 4
+            g[i] = f->getGradient(x[i - 1]);
+            // 5
+            if (alpha.len() < epsilon)
+                return x[i];
+            printf("len = %lf\n", alpha.len());
+            gamma = g[i] - g[i - 1];
+            gammaT = gamma.transpose();
             Matrix m1 = (alpha * alphaT) / (alphaT * gamma).v();
-            Matrix m2 = (H * gamma * gammaT * H) / (gammaT * H * gamma).v();
-            H = H + m1 + m2;
-            i++;
+            Matrix m2 = (H[i - 1] * gamma * gammaT * H[i - 1]) / (gammaT * H[i - 1] * gamma).v();
+            // 6
+            H[i] = H[i - 1] + m1 + m2;
+            x[i - 1] = x[i];
+            g[i - 1] = g[i];
+//            if (i == n && false) {
+//                H[i-1] = H[0];
+//                i = 1;
+//            } else {
+//                H[i - 1] = H[i];
+//                g[i-1] = g[i];
+//                //i++;
+//            }
         }
-        return x;
     }
 };
-
-
-/*
- *
- * Algorytm:
- * x0
- * dk = - (H f(x_k))^-1 * g f(x_k)
- *
- */
-
-
-// metoda Brenta
 
 Vec goldenRatio(Vec a, Vec b, Function *f) {
     double epsilon = 0.001;
     double k = (std::sqrt(5) - 1) / 2;
     Vec xL = b - k * (b - a);
     Vec xR = a + k * (b - a);
-    while ((b - a).d() > epsilon) {
-        double L;
-        double R;
+    double L;
+    double R;
+    while ((b - a).len() > epsilon) {
         L = f->get(xL);
         R = f->get(xR);
         if (L < R) {
             b = xR;
             xR = xL;
-            xL = b - k * (b - a);
+            xL = b - Vec::k_mul_a_minus_b(k, b, a);
         }
         else {
             a = xL;
             xL = xR;
-            xR = a + k * (b - a);
+            xR = a + Vec::k_mul_a_minus_b(k, b, a);
         }
     }
     return (a + b) / 2;

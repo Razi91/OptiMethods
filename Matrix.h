@@ -12,10 +12,11 @@ class Matrix {
     int w;
     int h;
 public:
+    Matrix() : Matrix(1,1) {};
     Matrix(const int w, const int h);
     Matrix(const int w);
     Matrix(const Matrix &m);
-    Matrix& operator=(Matrix &&m);
+    Matrix& operator=(const Matrix &m);
     ~Matrix();
 
     static Matrix identity(const int s);
@@ -24,7 +25,7 @@ public:
     double & operator()(const int x, const int y) const;
     void set(const int x, const int y, double val);
 
-    Matrix reverse(bool isDiagonal=false) const;
+    Matrix inverse(bool isDiagonal = false) const;
 
     double det() const;
 
