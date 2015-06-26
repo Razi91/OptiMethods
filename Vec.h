@@ -7,6 +7,8 @@
 
 class Matrix;
 
+#define ALIGN 2
+
 class Vec {
     double *data __attribute__ ((aligned(16))) = nullptr;
     int size;

@@ -29,24 +29,25 @@ public:
         Matrix H(x.getSize());
         Matrix H1(x.getSize());
         Vec g = f->getGradient(x);
+        g.dump("g");
         while (max_iter--) {
             H = f->getHessan(x);
             H1 = H.inverse();
             g = f->getGradient(x);
-            H.dump("H");
-            H1.dump("H-1");
-            g.dump();
-            Vec d = -(H * g);
-            Vec x_i = goldenRatio(x, x+d, f);
+//            H.dump("H");
+//            H1.dump("H-1");
+//            g.dump("g");
+            Vec d = -(H1 * g);
+            Vec x_i = goldenRatio(x, x + d, f);
             //Vec x_i = x + d;
             Vec g_i = f->getGradient(x_i);
             if ((x_i - x).len() < epsilon) {
                 return x_i;
             }
             x = x_i;
-            x.dump();
+//            x.dump("point");
         }
-        printf("\nno\n");
+        //printf("\nno\n");
         return x;
     }
 };
@@ -69,23 +70,30 @@ public:
         Vec x[n + 1];
         Matrix H[n + 1];
         Vec g[n + 1];
+        Vec d[n + 1];
         Vec tmp(p0.getSize());
         // 1
         x[0] = p0;
-        H[0] = Matrix::identity(x[0].getSize());
+        H[0] = Matrix::identity(p0.getSize());
         g[0] = f->getGradient(x[0]);
+        H[0].dump("H[0]");
+        g[0].dump("g[0]");
         i = 1;
         while (true) {
+            printf("==%d\n", i);
             // 2
-            Vec di = -(H[i - 1] * g[i - 1]);
+            d[i-1] = -(H[i - 1] * g[i - 1]);
+            H[i - 1].dump("h[i-1]");
+            g[i - 1].dump("g[i-1]");
+            d[i-1].dump("di");
             // 3 minimalizacja
-            //Vec x_n = x + di;
-            tmp = x[i - 1] + di;
+            tmp = x[i - 1] + d[i-1];
             x[i] = goldenRatio(x[i - 1], tmp, f);
+            x[i].dump();
             alpha = x[i] - x[i - 1];
             alphaT = alpha.transpose();
             // 4
-            g[i] = f->getGradient(x[i - 1]);
+            g[i] = f->getGradient(x[i]);
             // 5
             if (alpha.len() < epsilon)
                 return x[i];
@@ -96,16 +104,19 @@ public:
             Matrix m2 = (H[i - 1] * gamma * gammaT * H[i - 1]) / (gammaT * H[i - 1] * gamma).v();
             // 6
             H[i] = H[i - 1] + m1 + m2;
-            x[i - 1] = x[i];
-            g[i - 1] = g[i];
-//            if (i == n && false) {
-//                H[i-1] = H[0];
-//                i = 1;
-//            } else {
-//                H[i - 1] = H[i];
-//                g[i-1] = g[i];
-//                //i++;
-//            }
+//            x[i - 1] = x[i];
+//            g[i - 1] = g[i];
+//            H[i - 1] = H[i];
+            x[i].dump("x[i]");
+            if (i == n) {
+                //H[i-1] = H[0];
+                H[0] = H[i];
+                i = 1;
+            } else {
+                H[i - 1] = H[i];
+                g[i-1] = g[i];
+                i++;
+            }
         }
     }
 };

@@ -141,29 +141,41 @@ Vec Vec::operator/(const double b) const {
 ///////////////////////////////////////////////////
 Vec &Vec::operator+=(const Vec &b) {
     assert(size == b.size);
-    for (int i = 0; i < size; i++)
-        data[i] = (data[i] + b.data[i]);
+    for (int i = 0; i < size; i+=ALIGN) {
+        #pragma unroll
+        for (int ii = 0; ii < ALIGN; ii++)
+            data[i+ii] = (data[i+ii]+b.data[i+ii]);
+    }
     return *this;
 }
 
 Vec &Vec::operator-=(const Vec &b) {
     assert(size == b.size);
-    for (int i = 0; i < size; i++)
-        data[i] = (data[i] - b.data[i]);
+    for (int i = 0; i < size; i+=ALIGN) {
+#pragma unroll
+        for (int ii = 0; ii < ALIGN; ii++)
+            data[i+ii] = (data[i+ii]-b.data[i+ii]);
+    }
     return *this;
 }
 
 Vec &Vec::operator*=(const Vec &b) {
     assert(size == b.size);
-    for (int i = 0; i < size; i++)
-        data[i] = (data[i] * b.data[i]);
+    for (int i = 0; i < size; i+=ALIGN) {
+#pragma unroll
+        for (int ii = 0; ii < ALIGN; ii++)
+            data[i+ii] = (data[i+ii]*b.data[i+ii]);
+    }
     return *this;
 }
 
 Vec &Vec::operator/=(const Vec &b) {
     assert(size == b.size);
-    for (int i = 0; i < size; i++)
-        data[i] = (data[i] / b.data[i]);
+    for (int i = 0; i < size; i+=ALIGN) {
+        #pragma unroll
+        for (int ii = 0; ii < ALIGN; ii++)
+            data[i+ii] = (data[i+ii]/b.data[i+ii]);
+    }
     return *this;
 }
 
@@ -234,10 +246,8 @@ Vec Vec::k_mul_a_minus_b(double k, const Vec &a, const Vec &b) {
 Vec Vec::k_mul_a_plus_b(double k, const Vec &a, const Vec &b) {
     Vec v(a.getSize());
     const int size = a.getSize();
-    asm("nop");
     for (int i = 0; i < size; i++)
         v[i] = k * (a[i] + b[i]);
-    asm("nop");
     return v;
 }
 
