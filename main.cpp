@@ -7,7 +7,7 @@
 
 using namespace std;
 
-int main() {
+int main(int argc, char *argv[]) {
 //    int s = 4;
 //    Matrix m(s);
 //    for(int x=0; x<s; x++){
@@ -27,6 +27,9 @@ int main() {
     v.set(1, 0);
 
     int S = 10;
+    if (argc == 2){
+        S = atoi(argv[1]);
+    }
     Vec l(S);
     for (int i = 0; i < S; i++) {
         l[i] = i+4&0x16;//rand()%1000 / 10.0;
