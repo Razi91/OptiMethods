@@ -19,6 +19,16 @@ public:
     Matrix& operator=(const Matrix &m);
     ~Matrix();
 
+
+    int getW() const {
+        return w;
+    }
+
+    int getH() const {
+        return h;
+    }
+
+
     static Matrix identity(const int s);
 
     double get(const int x, const int y) const;

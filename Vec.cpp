@@ -172,22 +172,30 @@ Vec &Vec::operator*=(const Vec &b) {
 Vec &Vec::operator/=(const Vec &b) {
     assert(size == b.size);
     for (int i = 0; i < size; i+=ALIGN) {
-        #pragma unroll
+#pragma unroll
         for (int ii = 0; ii < ALIGN; ii++)
             data[i+ii] = (data[i+ii]/b.data[i+ii]);
     }
     return *this;
 }
 
+
 Vec &Vec::operator*=(const double b) {
-    for (int i = 0; i < size; i++)
-        data[i] = (data[i] * b);
+    for (int i = 0; i < size; i+=ALIGN) {
+    #pragma unroll
+        for (int ii = 0; ii < ALIGN; ii++)
+            data[i+ii] = (data[i+ii]*b);
+    }
     return *this;
 }
 
+
 Vec &Vec::operator/=(const double b) {
-    for (int i = 0; i < size; i++)
-        data[i] = (data[i] / b);
+    for (int i = 0; i < size; i+=ALIGN) {
+#pragma unroll
+        for (int ii = 0; ii < ALIGN; ii++)
+            data[i+ii] = (data[i+ii]/b);
+    }
     return *this;
 }
 
