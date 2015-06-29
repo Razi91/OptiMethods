@@ -24,7 +24,9 @@ Vec NewtonRaphson(Function &f, Vec x) {
     Matrix H1(x.getSize());
     Vec g = f.getGradient(x);
 //    g.dump("g");
+    int iters = 0;
     while (max_iter--) {
+        iters++;
         H = f.getHessan(x);
         H1 = H.inverse();
         g = f.getGradient(x);
@@ -36,6 +38,7 @@ Vec NewtonRaphson(Function &f, Vec x) {
         //Vec x_i = x + d;
         Vec g_i = f.getGradient(x_i);
         if ((x_i - x).len() < epsilon) {
+            printf("iters: %d\n", iters);
             return x_i;
         }
         x = x_i;
@@ -61,7 +64,10 @@ Vec Davidon(Function &f, const Vec &p0) {
     H[0] = Matrix::identity(p0.getSize());
     g[0] = f.getGradient(x[0]);
     i = 1;
-    while (true) {
+    int iters = 0;
+    int max_iters = 100;
+    while (max_iters--) {
+        iters++;
 //        x[i-1].dump("x[i-1]");
 //        g[i-1].dump("g[i-1]");
 //        printf("==%d\n", i);
@@ -85,6 +91,7 @@ Vec Davidon(Function &f, const Vec &p0) {
 //            tmp.dump("tmp");
             printf("diff  %lf -- %lf\n", f1, f2);
 //            alpha.dump("alpha");
+            printf("iters: %d\n", iters);
             return x[i];
         }
         gamma = g[i] - g[i - 1];
@@ -107,6 +114,7 @@ Vec Davidon(Function &f, const Vec &p0) {
         x[i-1] = x[i];
         g[i-1] = g[i];
     }
+    return x[i];
 }
 
 Vec goldenRatio(Vec a, Vec b, Function &f) {

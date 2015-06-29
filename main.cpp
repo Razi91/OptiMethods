@@ -64,14 +64,14 @@ int main(int argc, char *argv[]) {
         double time = omp_get_wtime() - start_time;
         printf("TIME: %lf\n", time);
     }
-    printf("\n\t\tDavidon\n");
-    {
-        double start_time = omp_get_wtime();
-        Vec x = Davidon(f2, l);
-        x.dump();
-        printf("f(x) = %lf\n", f2(x));
-        double time = omp_get_wtime() - start_time;
-        printf("TIME: %lf\n", time);
-    }
+//    printf("\n\t\tDavidon\n");
+//    {
+//        double start_time = omp_get_wtime();
+//        Vec x = Davidon(f2, l);
+//        x.dump();
+//        printf("f(x) = %lf\n", f2(x));
+//        double time = omp_get_wtime() - start_time;
+//        printf("TIME: %lf\n", time);
+//    }
     return 0;
 }
